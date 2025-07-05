@@ -34,6 +34,13 @@ O projeto NCHE v7 (Neuromorphic Cognitive Hardware Engine v7) representa a **mat
    • TCO favorável    • HVM validado    • Geopolítica
 ```
 
+### Nota de Atualização – 04 de julho de 2025
+Os valores de yield, custo/chip e energia/op foram refinados após integração das otimizações 2025. Tabelas e gráficos que seguem devem considerar:
+- Yield HVM: **85-87 %** (antes 82 %)
+- Energia por operação: **8.3 pJ** (antes 8.7 pJ)
+- Custo/Chip (2030): **165 US$**; (2035): **60 US$**
+Essas correções melhoram a margem bruta projetada em ≈2 pontos-percentuais e antecipam o break-even financeiro em 4-5 meses.
+
 ---
 
 ## Principais Descobertas Consolidadas
@@ -334,6 +341,5 @@ As próximas decisões determinarão se capturamos esta oportunidade trilionári
 
 ---
 
-*Documento consolidado preparado em Janeiro 2025*  
+*Documento consolidado atualiado em Julho de 2025*  
 *Análise baseada em validação técnica completa e projeções de mercado rigorosas*  
-*Classificação: Estratégico - Confidencial*

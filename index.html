@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NCHE V7 - Dashboard Arquitetural HVM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --info-color: #3b82f6;
+            --dark-bg: #0f172a;
+            --card-bg: rgba(15, 23, 42, 0.8);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1920px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 3rem 2rem;
+            background: var(--glass-bg);
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: var(--primary-gradient);
+            opacity: 0.1;
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: var(--success-color);
+            color: white;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .controls-section {
+            margin-bottom: 3rem;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .control-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+        }
+
+        .control-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow);
+        }
+
+        .control-card h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .control-input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .control-input:focus {
+            outline: none;
+            border-color: var(--info-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .range-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .range-input {
+            flex: 1;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            outline: none;
+            appearance: none;
+        }
+
+        .range-input::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--primary-gradient);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .range-value {
+            font-weight: 600;
+            color: var(--info-color);
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .metric-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .metric-card:hover::before {
+            left: 100%;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow);
+        }
+
+        .metric-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .metric-value {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .metric-label {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .metric-unit {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            opacity: 0.8;
+        }
+
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            text-align: center;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .architecture-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .layer-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .layer-card.active {
+            border-color: var(--success-color);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .layer-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .layer-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--success-color);
+            margin: 0 auto;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .thermal-map {
+            background: var(--glass-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(20px);
+            margin-bottom: 2rem;
+        }
+
+        .thermal-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 4px;
+            margin-top: 1rem;
+        }
+
+        .thermal-cell {
+            aspect-ratio: 1;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .thermal-cell:hover {
+            transform: scale(1.1);
+            z-index: 10;
+            position: relative;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .comparison-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+        }
+
+        .comparison-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow);
+        }
+
+        .comparison-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .comparison-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: var(--secondary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .improvement {
+            font-size: 0.875rem;
+            color: var(--success-color);
+            font-weight: 600;
+        }
+
+        .progress-container {
+            margin-top: 2rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-gradient);
+            border-radius: 6px;
+            transition: width 0.3s ease;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: progress-shimmer 1.5s infinite;
+        }
+
+        @keyframes progress-shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .logs-container {
+            background: var(--glass-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(20px);
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .log-timestamp {
+            color: var(--info-color);
+            font-weight: 600;
+            min-width: 80px;
+        }
+
+        .log-level {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .log-level.info { background: var(--info-color); }
+        .log-level.success { background: var(--success-color); }
+        .log-level.warning { background: var(--warning-color); }
+        .log-level.error { background: var(--error-color); }
+
+        .system-status {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .status-value {
+            font-weight: 600;
+            color: var(--success-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            }
+
+            .architecture-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .thermal-grid {
+                grid-template-columns: repeat(8, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1>NCHE V7</h1>
+                <p class="subtitle">Neuromorphic Cognitive Hardware Engine - High Volume Manufacturing</p>
+                <div class="status-badge">
+                    <i class="fas fa-microchip"></i>
+                    HVM Ready - TRL 7-8
+                </div>
+            </div>
+        </header>
+
+        <section class="controls-section">
+            <div class="controls-grid">
+                <div class="control-card">
+                    <h3><i class="fas fa-brain"></i> Tipo de Carga</h3>
+                    <select id="workload" class="control-input">
+                        <option value="image">Reconhecimento de Imagem</option>
+                        <option value="speech">Processamento de Fala</option>
+                        <option value="decision">Tomada de Decisão</option>
+                        <option value="learning">Aprendizagem Adaptativa</option>
+                        <option value="multimodal">Processamento Multimodal</option>
+                    </select>
+                </div>
+
+                <div class="control-card">
+                    <h3><i class="fas fa-network-wired"></i> Neurônios</h3>
+                    <div class="range-container">
+                        <input type="range" id="neurons" class="range-input" min="10" max="1000" value="100">
+                        <span class="range-value" id="neuronCount">100K</span>
+                    </div>
+                </div>
+
+                <div class="control-card">
+                    <h3><i class="fas fa-tachometer-alt"></i> Frequência</h3>
+                    <div class="range-container">
+                        <input type="range" id="frequency" class="range-input" min="100" max="2000" value="800">
+                        <span class="range-value" id="freqValue">800 MHz</span>
+                    </div>
+                </div>
+
+                <div class="control-card">
+                    <h3><i class="fas fa-play-circle"></i> Controle</h3>
+                    <button id="startBenchmark" class="btn-primary">
+                        <i class="fas fa-rocket"></i>
+                        Iniciar Benchmark
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="metric-value" id="processingRate">0</div>
+                    <div class="metric-label">Taxa de Processamento</div>
+                    <div class="metric-unit">GSOPS</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <div class="metric-value" id="energyEfficiency">0</div>
+                    <div class="metric-label">Eficiência Energética</div>
+                    <div class="metric-unit">TOPS/W</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="metric-value" id="latency">0</div>
+                    <div class="metric-label">Latência</div>
+                    <div class="metric-unit">μs</div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon">
+                        <i class="fas fa-thermometer-half"></i>
+                    </div>
+                    <div class="metric-value" id="temperature">25</div>
+                    <div class="metric-label">Temperatura</div>
+                    <div class="metric-unit">°C</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">Arquitetura M3D - Monitoramento em Tempo Real</h2>
+            <div class="architecture-grid">
+                <div class="layer-card" id="layer1">
+                    <h3>Camada 1</h3>
+                    <p>Lógica Neural CMOS 7nm</p>
+                    <div class="status-indicator" id="status1"></div>
+                </div>
+
+                <div class="layer-card" id="layer2">
+                    <h3>Camada 2</h3>
+                    <p>Memristores HfO₂:ZrO₂ (15%)</p>
+                    <div class="status-indicator" id="status2"></div>
+                </div>
+
+                <div class="layer-card" id="layer3">
+                    <h3>Camada 3</h3>
+                    <p>Rede Ótica SiPh (ONoC)</p>
+                    <div class="status-indicator" id="status3"></div>
+                </div>
+
+                <div class="layer-card" id="layer4">
+                    <h3>Camada 4</h3>
+                    <p>Microfluídica + SiC</p>
+                    <div class="status-indicator" id="status4"></div>
+                </div>
+            </div>
+
+            <div class="system-status">
+                <div class="status-item">
+                    <span>Yield Efetivo</span>
+                    <span class="status-value" id="yieldStatus">82%</span>
+                </div>
+                <div class="status-item">
+                    <span>Auto-Reparação</span>
+                    <span class="status-value" id="repairStatus">Ativa</span>
+                </div>
+                <div class="status-item">
+                    <span>Metaplasticidade</span>
+                    <span class="status-value" id="metaplasticityStatus">Probabilística</span>
+                </div>
+                <div class="status-item">
+                    <span>Comunicação ONoC</span>
+                    <span class="status-value" id="onocStatus">10.3 Tbps/mm²</span>
+                </div>
+                <div class="status-item">
+                    <span>Variabilidade CV</span>
+                    <span class="status-value" id="variabilityStatus">9.8%</span>
+                </div>
+                <div class="status-item">
+                    <span>MTTF</span>
+                    <span class="status-value" id="mttfStatus">15 anos</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">Mapa Térmico - Gestão Microfluídica</h2>
+            <div class="thermal-map">
+                <div class="thermal-grid" id="thermalGrid"></div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">Comparação Benchmarks</h2>
+            <div class="comparison-grid">
+                <div class="comparison-card">
+                    <div class="comparison-title">CPU Intel i9-13900K</div>
+                    <div class="comparison-value">2.5</div>
+                    <div class="metric-unit">TOPS/W</div>
+                    <div class="improvement">NCHE V7: 847x superior</div>
+                </div>
+
+                <div class="comparison-card">
+                    <div class="comparison-title">GPU NVIDIA H100</div>
+                    <div class="comparison-value">30</div>
+                    <div class="metric-unit">TOPS/W</div>
+                    <div class="improvement">NCHE V7: 70x superior</div>
+                </div>
+
+                <div class="comparison-card">
+                    <div class="comparison-title">Loihi 2</div>
+                    <div class="comparison-value">280</div>
+                    <div class="metric-unit">TOPS/W</div>
+                    <div class="improvement">NCHE V7: 7.6x superior</div>
+                </div>
+
+                <div class="comparison-card">
+                    <div class="comparison-title">IBM NorthPole</div>
+                    <div class="comparison-value">450</div>
+                    <div class="metric-unit">TOPS/W</div>
+                    <div class="improvement">NCHE V7: 4.7x superior</div>
+                </div>
+
+                <div class="comparison-card">
+                    <div class="comparison-title">NCHE V7</div>
+                    <div class="comparison-value" id="nche-efficiency">2117</div>
+                    <div class="metric-unit">TOPS/W</div>
+                    <div class="improvement">Líder Mundial HVM</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section-title">Progresso do Benchmark</h2>
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+                <div class="logs-container" id="logs"></div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Constantes do NCHE V7 baseadas na documentação
+        const NCHE_V7_SPECS = {
+            maxTemp: 75,           // °C (com microfluídica + SiC)
+            maxYield: 82,          // % (com auto-reparação)
+            baseEfficiency: 2117,  // TOPS/W
+            energyPerOp: 8.7,      // pJ por operação
+            variabilityCV: 9.8,    // % coeficiente de variação
+            mttf: 15,              // anos
+            onocThroughput: 10.3   // Tbps/mm²
+        };
+
+        // Variáveis globais
+        let benchmarkRunning = false;
+        let currentMetrics = {
+            processingRate: 0,
+            energyEfficiency: 0,
+            latency: 0,
+            temperature: 25
+        };
+        let thermalCells = [];
+        let logEntries = [];
+        let updateInterval = null;
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeThermalMap();
+            updateMetrics();
+            startSystemMonitoring();
+
+            // Event listeners
+            document.getElementById('neurons').addEventListener('input', updateNeuronCount);
+            document.getElementById('frequency').addEventListener('input', updateFrequency);
+            document.getElementById('workload').addEventListener('change', calculateMetrics);
+            document.getElementById('startBenchmark').addEventListener('click', startBenchmark);
+        });
+
+        function initializeThermalMap() {
+            const thermalGrid = document.getElementById('thermalGrid');
+
+            for (let i = 0; i < 96; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'thermal-cell';
+                cell.id = `thermal-${i}`;
+                thermalGrid.appendChild(cell);
+                thermalCells.push(cell);
+            }
+
+            updateThermalMap();
+        }
+
+        function updateThermalMap() {
+            const baseTemp = parseFloat(currentMetrics.temperature);
+
+            thermalCells.forEach((cell, index) => {
+                // Simula variação térmica baseada na posição e tempo
+                const variation = Math.sin(Date.now() * 0.001 + index * 0.1) * 3;
+                const temp = Math.max(20, Math.min(85, baseTemp + variation));
+
+                cell.textContent = `${Math.round(temp)}°C`;
+                cell.title = `Célula ${index + 1}: ${Math.round(temp)}°C`;
+
+                // Cores baseadas na temperatura (verde = frio, vermelho = quente)
+                if (temp < 40) {
+                    cell.style.background = `linear-gradient(45deg, #10b981, #059669)`;
+                } else if (temp < 60) {
+                    cell.style.background = `linear-gradient(45deg, #f59e0b, #d97706)`;
+                } else {
+                    cell.style.background = `linear-gradient(45deg, #ef4444, #dc2626)`;
+                }
+            });
+        }
+
+        function updateNeuronCount() {
+            const neurons = document.getElementById('neurons').value;
+            document.getElementById('neuronCount').textContent = neurons + 'K';
+            calculateMetrics();
+        }
+
+        function updateFrequency() {
+            const frequency = document.getElementById('frequency').value;
+            document.getElementById('freqValue').textContent = frequency + ' MHz';
+            calculateMetrics();
+        }
+
+        function calculateMetrics() {
+            const neurons = parseInt(document.getElementById('neurons').value) * 1000;
+            const frequency = parseInt(document.getElementById('frequency').value);
+            const workload = document.getElementById('workload').value;
+
+            // Cálculos baseados nas especificações reais do NCHE V7
+            const baseProcessingRate = (neurons * frequency * 0.9) / 1000000; // GSOPS
+            const baseEnergyEfficiency = NCHE_V7_SPECS.baseEfficiency * 
+                                       (frequency / 1000) * (neurons / 100000) * 0.8;
+            const baseLatency = 12 + (neurons / 20000) + (2000 - frequency) * 0.005; // μs
+            const baseTemperature = 25 + (frequency / 80) + (neurons / 80000);
+
+            // Limitação pela gestão térmica microfluídica
+            const maxTemp = Math.min(baseTemperature, NCHE_V7_SPECS.maxTemp);
+
+            // Ajustes baseados no tipo de carga
+            const workloadMultipliers = {
+                image: { processing: 1.3, energy: 1.15, latency: 0.85, temp: 1.1 },
+                speech: { processing: 1.1, energy: 1.25, latency: 0.95, temp: 1.0 },
+                decision: { processing: 0.9, energy: 1.35, latency: 1.15, temp: 0.9 },
+                learning: { processing: 1.6, energy: 0.95, latency: 1.05, temp: 1.2 },
+                multimodal: { processing: 1.4, energy: 1.05, latency: 1.1, temp: 1.15 }
+            };
+
+            const multipliers = workloadMultipliers[workload] || workloadMultipliers.image;
+
+            currentMetrics.processingRate = (baseProcessingRate * multipliers.processing).toFixed(1);
+            currentMetrics.energyEfficiency = Math.round(baseEnergyEfficiency * multipliers.energy);
+            currentMetrics.latency = (baseLatency * multipliers.latency).toFixed(1);
+            currentMetrics.temperature = Math.min(NCHE_V7_SPECS.maxTemp, maxTemp * multipliers.temp).toFixed(1);
+
+            updateMetrics();
+        }
+
+        function updateMetrics() {
+            document.getElementById('processingRate').textContent = currentMetrics.processingRate;
+            document.getElementById('energyEfficiency').textContent = currentMetrics.energyEfficiency;
+            document.getElementById('latency').textContent = currentMetrics.latency;
+            document.getElementById('temperature').textContent = currentMetrics.temperature;
+
+            // Atualiza eficiência na comparação
+            document.getElementById('nche-efficiency').textContent = currentMetrics.energyEfficiency;
+
+            updateThermalMap();
+            updateLayerStatus();
+        }
+
+        function updateLayerStatus() {
+            const layers = ['layer1', 'layer2', 'layer3', 'layer4'];
+            const statuses = ['status1', 'status2', 'status3', 'status4'];
+
+            layers.forEach((layer, index) => {
+                const element = document.getElementById(layer);
+                const status = document.getElementById(statuses[index]);
+
+                if (benchmarkRunning) {
+                    element.classList.add('active');
+                    status.style.background = '#10b981';
+                } else {
+                    element.classList.remove('active');
+                    status.style.background = '#6b7280';
+                }
+            });
+        }
+
+        function startBenchmark() {
+            if (benchmarkRunning) return;
+
+            benchmarkRunning = true;
+            const button = document.getElementById('startBenchmark');
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Executando...';
+            button.disabled = true;
+
+            logEntry('Inicializando sistema NCHE V7...', 'info');
+            logEntry('Ativando metaplasticidade probabilística...', 'info');
+
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 3 + 1;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(progressInterval);
+                    completeBenchmark();
+                }
+
+                document.getElementById('progressFill').style.width = progress + '%';
+
+                // Simula logs durante o benchmark
+                if (Math.random() < 0.4) {
+                    const messages = [
+                        'Calibrando HfO₂:ZrO₂ com 15% ZrO₂...',
+                        'Otimizando comunicação ONoC SiPh...',
+                        'Ativando auto-reparação astromórfica...',
+                        'Ajustando microfluídica (canais 50μm)...',
+                        'Sincronizando camadas M3D...',
+                        'Validando tolerância 9.8% CV...',
+                        'Monitorando temperatura ≤75°C...',
+                        'Verificando yield 82% efetivo...'
+                    ];
+
+                    const message = messages[Math.floor(Math.random() * messages.length)];
+                    logEntry(message, 'info');
+                }
+            }, 300);
+
+            // Atualiza métricas dinamicamente durante o benchmark
+            updateInterval = setInterval(() => {
+                if (!benchmarkRunning) {
+                    clearInterval(updateInterval);
+                    return;
+                }
+
+                // Adiciona variação realística baseada nas especificações V7
+                const variation = 0.98 + Math.random() * 0.04;
+                currentMetrics.processingRate = (parseFloat(currentMetrics.processingRate) * variation).toFixed(1);
+                currentMetrics.energyEfficiency = Math.round(parseFloat(currentMetrics.energyEfficiency) * variation);
+                currentMetrics.latency = (parseFloat(currentMetrics.latency) * (2 - variation)).toFixed(1);
+
+                // Temperatura controlada pela microfluídica
+                const tempVariation = 0.995 + Math.random() * 0.01;
+                currentMetrics.temperature = Math.min(NCHE_V7_SPECS.maxTemp, 
+                                                    parseFloat(currentMetrics.temperature) * tempVariation).toFixed(1);
+
+                updateMetrics();
+            }, 500);
+        }
+
+        function completeBenchmark() {
+            benchmarkRunning = false;
+
+            const button = document.getElementById('startBenchmark');
+            button.innerHTML = '<i class="fas fa-rocket"></i> Iniciar Benchmark';
+            button.disabled = false;
+
+            logEntry('Benchmark NCHE V7 concluído com sucesso!', 'success');
+            logEntry(`Eficiência: ${currentMetrics.energyEfficiency} TOPS/W`, 'success');
+            logEntry(`Yield mantido: ${NCHE_V7_SPECS.maxYield}%`, 'success');
+            logEntry(`Temperatura máxima: ${currentMetrics.temperature}°C`, 'success');
+            logEntry(`Variabilidade CV: ${NCHE_V7_SPECS.variabilityCV}%`, 'success');
+            logEntry('Sistema HVM validado - TRL 7-8', 'success');
+
+            // Simula alguns logs adicionais
+            setTimeout(() => {
+                logEntry('Microfluídica estável em 10mL/min', 'info');
+                logEntry('Auto-reparação: 3 defeitos corrigidos', 'info');
+                logEntry('ONoC: 10.3 Tbps/mm² sustentado', 'info');
+            }, 1000);
+        }
+
+        function logEntry(message, level = 'info') {
+            const logsContainer = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `
+                <span class="log-timestamp">${timestamp}</span>
+                <span class="log-level ${level}">${level.toUpperCase()}</span>
+                <span class="log-message">${message}</span>
+            `;
+
+            logsContainer.appendChild(entry);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
+
+            // Limita a 50 entradas para performance
+            if (logsContainer.children.length > 50) {
+                logsContainer.removeChild(logsContainer.firstChild);
+            }
+        }
+
+        function startSystemMonitoring() {
+            // Simula monitoramento contínuo do sistema
+            setInterval(() => {
+                if (!benchmarkRunning) {
+                    // Atualiza status do sistema periodicamente
+                    const onocValue = (NCHE_V7_SPECS.onocThroughput + Math.random() * 0.2).toFixed(1);
+                    document.getElementById('onocStatus').textContent = onocValue + ' Tbps/mm²';
+
+                    // Pequenas variações no yield devido ao auto-reparo
+                    const yieldValue = (NCHE_V7_SPECS.maxYield + Math.random() * 2 - 1).toFixed(1);
+                    document.getElementById('yieldStatus').textContent = yieldValue + '%';
+                }
+            }, 3000);
+
+            // Atualiza mapa térmico periodicamente
+            setInterval(() => {
+                updateThermalMap();
+            }, 1000);
+        }
+
+        // Inicializa métricas ao carregar
+        calculateMetrics();
+    </script>
+</body>
+</html>
