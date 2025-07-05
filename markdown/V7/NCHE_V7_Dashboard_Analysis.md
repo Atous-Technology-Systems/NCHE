@@ -1,3 +1,4 @@
+@@ -0,0 +1,336 @@
 # NCHE V7 Dashboard - Análise e Melhorias Implementadas
 
 ## Resumo Executivo

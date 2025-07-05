@@ -146,12 +146,30 @@
             color: var(--text-primary);
             font-size: 1rem;
             transition: all 0.3s ease;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            cursor: pointer;
         }
 
         .control-input:focus {
             outline: none;
             border-color: var(--info-color);
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        select.control-input {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23cbd5e1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.5em;
+            padding-right: 3rem;
+        }
+
+        select.control-input option {
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            padding: 0.5rem;
         }
 
         .range-container {
@@ -529,24 +547,102 @@
                 padding: 1rem;
             }
 
+            .header {
+                padding: 2rem 1rem;
+            }
+
             .header h1 {
                 font-size: 2.5rem;
             }
 
+            .header .subtitle {
+                font-size: 1rem;
+            }
+
             .controls-grid {
                 grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .control-card {
+                padding: 1.5rem;
             }
 
             .metrics-grid {
                 grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+                gap: 1rem;
+            }
+
+            .metric-card {
+                padding: 1.5rem;
+            }
+
+            .metric-value {
+                font-size: 2.5rem;
             }
 
             .architecture-grid {
                 grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .layer-card {
+                padding: 1.5rem;
             }
 
             .thermal-grid {
-                grid-template-columns: repeat(8, 1fr);
+                grid-template-columns: repeat(6, 1fr);
+                gap: 2px;
+            }
+
+            .thermal-cell {
+                font-size: 0.6rem;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .comparison-card {
+                padding: 1.5rem;
+            }
+
+            .logs-container {
+                max-height: 200px;
+                padding: 1rem;
+            }
+
+            .log-entry {
+                padding: 0.5rem;
+                font-size: 0.75rem;
+            }
+
+            .btn-primary {
+                padding: 0.75rem 1.5rem;
+                font-size: 0.875rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .thermal-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .metric-value {
+                font-size: 2rem;
+            }
+
+            .metric-icon {
+                font-size: 2rem;
+            }
+
+            .system-status {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -674,7 +770,7 @@
             <div class="system-status">
                 <div class="status-item">
                     <span>Yield Efetivo</span>
-                    <span class="status-value" id="yieldStatus">82%</span>
+                    <span class="status-value" id="yieldStatus">85-87%</span>
                 </div>
                 <div class="status-item">
                     <span>Auto-Reparação</span>
@@ -761,9 +857,9 @@
         // Constantes do NCHE V7 baseadas na documentação
         const NCHE_V7_SPECS = {
             maxTemp: 75,           // °C (com microfluídica + SiC)
-            maxYield: 82,          // % (com auto-reparação)
+            maxYield: 87,          // % (com auto-reparação)
             baseEfficiency: 2117,  // TOPS/W
-            energyPerOp: 8.7,      // pJ por operação
+            energyPerOp: 8.3,      // pJ por operação
             variabilityCV: 9.8,    // % coeficiente de variação
             mttf: 15,              // anos
             onocThroughput: 10.3   // Tbps/mm²
@@ -1003,33 +1099,25 @@
                 <span class="log-message">${message}</span>
             `;
 
-            logsContainer.appendChild(entry);
-            logsContainer.scrollTop = logsContainer.scrollHeight;
+            logsContainer.insertBefore(entry, logsContainer.firstChild);
+            logEntries.push({ timestamp, level, message });
 
-            // Limita a 50 entradas para performance
-            if (logsContainer.children.length > 50) {
-                logsContainer.removeChild(logsContainer.firstChild);
+            // Limita o número de logs visíveis
+            while (logsContainer.children.length > 50) {
+                logsContainer.removeChild(logsContainer.lastChild);
             }
         }
 
         function startSystemMonitoring() {
-            // Simula monitoramento contínuo do sistema
+            // Atualiza status do sistema a cada 5 segundos
             setInterval(() => {
-                if (!benchmarkRunning) {
-                    // Atualiza status do sistema periodicamente
-                    const onocValue = (NCHE_V7_SPECS.onocThroughput + Math.random() * 0.2).toFixed(1);
-                    document.getElementById('onocStatus').textContent = onocValue + ' Tbps/mm²';
-
-                    // Pequenas variações no yield devido ao auto-reparo
-                    const yieldValue = (NCHE_V7_SPECS.maxYield + Math.random() * 2 - 1).toFixed(1);
-                    document.getElementById('yieldStatus').textContent = yieldValue + '%';
-                }
-            }, 3000);
-
-            // Atualiza mapa térmico periodicamente
-            setInterval(() => {
-                updateThermalMap();
-            }, 1000);
+                document.getElementById('yieldStatus').textContent = '85-87%';
+                document.getElementById('repairStatus').textContent = 'Ativa';
+                document.getElementById('metaplasticityStatus').textContent = 'Probabilística';
+                document.getElementById('onocStatus').textContent = '10.3 Tbps/mm²';
+                document.getElementById('variabilityStatus').textContent = '9.8%';
+                document.getElementById('mttfStatus').textContent = '15 anos';
+            }, 5000);
         }
 
         // Inicializa métricas ao carregar
