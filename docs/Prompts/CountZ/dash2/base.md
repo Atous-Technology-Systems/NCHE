@@ -1,188 +1,3 @@
-<deepseek #1>
-
-# Implementação de Sistema de Memória Semântica Baseado em SQL
-
-## Análise de Problemas e Soluções
-
-### Problema 1: Complexidade na Recuperação de Contexto
-**Erro**: Sistemas tradicionais usam busca por similaridade vetorial que é computacionalmente cara (O(n×d)).
-
-**Solução**: Substituir por sistema baseado em flags semânticas com índices SQL.
-
-### Problema 2: Dependência de Hardware Especializado
-**Erro**: Requer GPUs para processamento eficiente de embeddings.
-
-**Solução**: Operações SQL podem rodar em CPUs comuns, até em dispositivos móveis.
-
-### Problema 3: Dificuldade de Debugging
-**Erro**: Embeddings são caixas-pretas não interpretáveis.
-
-**Solução**: Flags semânticas são explicitamente definidas e fáceis de entender.
-
-## Implementação para Humanos (Versão Simplificada)
-
-```python
-class SistemaMemoria:
-    def __init__(self):
-        # Conecta ao banco de dados
-        self.conexao = sqlite3.connect(':memory:')
-        self.criar_tabela()
-    
-    def criar_tabela(self):
-        """Cria tabela com colunas semânticas"""
-        self.conexao.execute("""
-        CREATE TABLE memorias (
-            id INTEGER PRIMARY KEY,
-            conteudo TEXT,
-            valencia REAL,  # -1.0 a +1.0
-            tecnico BOOLEAN,
-            urgente BOOLEAN,
-            erro BOOLEAN,
-            financeiro BOOLEAN,
-            timestamp INTEGER
-        )
-        """)
-        
-        # Cria índices para buscas rápidas
-        self.conexao.execute("CREATE INDEX idx_tecnico_urgente ON memorias(tecnico, urgente)")
-        self.conexao.execute("CREATE INDEX idx_erro_financeiro ON memorias(erro, financeiro)")
-
-    def adicionar_memoria(self, texto, valencia, flags):
-        """Adiciona uma nova memória ao sistema"""
-        self.conexao.execute("""
-        INSERT INTO memorias (conteudo, valencia, tecnico, urgente, erro, financeiro, timestamp)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (texto, valencia, *flags.values(), int(time.time())))
-
-    def buscar_tecnicos_urgentes(self):
-        """Busca problemas técnicos urgentes"""
-        cursor = self.conexao.execute("""
-        SELECT conteudo, valencia 
-        FROM memorias 
-        WHERE tecnico = 1 AND urgente = 1
-        ORDER BY valencia DESC, timestamp DESC
-        LIMIT 5
-        """)
-        return cursor.fetchall()
-
-    def buscar_erros_financeiros(self):
-        """Busca erros financeiros críticos"""
-        cursor = self.conexao.execute("""
-        SELECT conteudo, valencia
-        FROM memorias
-        WHERE erro = 1 AND financeiro = 1 AND valencia < -0.5
-        ORDER BY valencia
-        LIMIT 3
-        """)
-        return cursor.fetchall()
-```
-
-**Exemplo de Uso**:
-```python
-sistema = SistemaMemoria()
-
-# Adiciona memórias com flags semânticas
-sistema.adicionar_memoria(
-    "Servidor crashou", 
-    -0.9, 
-    {"tecnico": True, "urgente": True, "erro": True}
-)
-
-sistema.adicionar_memoria(
-    "Problema no pagamento", 
-    -0.7, 
-    {"financeiro": True, "erro": True}
-)
-
-# Busca eficiente
-print("Problemas técnicos urgentes:")
-for conteudo, valencia in sistema.buscar_tecnicos_urgentes():
-    print(f"- {conteudo} (valência: {valencia})")
-```
-
-## Implementação Otimizada (SQL Avançado)
-
-```sql
--- Tabela otimizada com geração automática de scores
-CREATE TABLE memorias (
-    id INTEGER PRIMARY KEY,
-    conteudo TEXT NOT NULL,
-    valencia REAL NOT NULL CHECK(valencia BETWEEN -1.0 AND 1.0),
-    
-    -- Flags semânticas
-    tecnico BOOLEAN NOT NULL DEFAULT 0,
-    urgente BOOLEAN NOT NULL DEFAULT 0,
-    erro BOOLEAN NOT NULL DEFAULT 0,
-    financeiro BOOLEAN NOT NULL DEFAULT 0,
-    
-    -- Score calculado automaticamente
-    score REAL GENERATED ALWAYS AS (
-        (tecnico * 1.5) + 
-        (urgente * 2.0) + 
-        (erro * 2.5) + 
-        (financeiro * 1.8)
-    ) * (1 + ABS(valencia) * 0.5) STORED,
-    
-    timestamp INTEGER NOT NULL
-);
-
--- Índices otimizados
-CREATE INDEX idx_prioridade ON memorias(score DESC);
-CREATE INDEX idx_tecnico_urgente ON memorias(tecnico, urgente) WHERE tecnico = 1 AND urgente = 1;
-CREATE INDEX idx_erro_financeiro ON memorias(erro, financeiro) WHERE erro = 1 AND financeiro = 1;
-
--- View materializada para consultas complexas
-CREATE VIEW memorias_criticas AS
-SELECT id, conteudo, valencia, score,
-       CASE
-         WHEN tecnico AND urgente THEN 'crítico_tecnico'
-         WHEN erro AND financeiro THEN 'erro_financeiro'
-         ELSE 'outros'
-       END as categoria
-FROM memorias
-WHERE score > 2.0;
-```
-
-## Comparação de Desempenho
-
-| Métrica               | Busca Vetorial Tradicional | SQL Semântico |
-|-----------------------|---------------------------|---------------|
-| Complexidade          | O(n×d) (1.5B ops)        | O(log n) (20 ops) |
-| Latência              | 3000-6000ms              | <1ms          |
-| Hardware              | GPU requerida            | CPU comum     |
-| Memória (1M itens)    | ~6GB                     | ~60MB         |
-| Interpretabilidade    | Baixa (embeddings)       | Alta (flags explícitas) |
-
-## Vantagens do Sistema Proposto
-
-1. **Eficiência Computacional**:
-   - Redução de 1.5 bilhão para ~20 operações por consulta
-   - 3000x mais rápido que abordagens tradicionais
-
-2. **Simplicidade**:
-   - Consultas SQL padrão em vez de algoritmos complexos
-   - Fácil de entender e manter
-
-3. **Portabilidade**:
-   - Funciona em qualquer dispositivo com um banco de dados SQL
-   - Operações offline sem necessidade de GPU
-
-4. **Flexibilidade**:
-   - Fácil adição de novas flags semânticas
-   - Combinações complexas através de consultas SQL
-
-## Conclusão
-
-Esta abordagem transforma a recuperação de contexto de uma operação complexa e custosa em uma simples consulta SQL, mantendo toda a potência semântica através de um sistema bem projetado de flags e índices.
-
-**Próximos passos**:
-1. Implementar detecção automática de flags
-2. Adicionar decaimento temporal para memórias antigas
-3. Desenvolver interface para visualização das relações semânticas
-
-A mudança de paradigma de "similaridade vetorial" para "flags semânticas indexadas" representa um avanço significativo na eficiência de sistemas de memória para IA.
-
-<deepseek #2>
 
 # Implementação Otimizada em Java do Living Memory Model
 
@@ -898,16 +713,16 @@ public class LMMDemo {
 
 ## Benefícios da Implementação
 
-1. **Eficiência**: Consultas em O(log n) vs O(n×d) tradicional
-2. **Portabilidade**: Funciona em qualquer dispositivo com Java
-3. **Baixo consumo**: ~50MB RAM para 1M de interações
-4. **Offline**: Operação completa sem necessidade de internet
-5. **Privacidade**: Todos os dados armazenados localmente
+    1. **Eficiência**: Consultas em O(log n) vs O(n×d) tradicional
+    2. **Portabilidade**: Funciona em qualquer dispositivo com Java
+    3. **Baixo consumo**: ~50MB RAM para 1M de interações
+    4. **Offline**: Operação completa sem necessidade de internet
+    5. **Privacidade**: Todos os dados armazenados localmente
 
-Esta implementação atinge os objetivos de:
-- Redução de 95-98% no uso de memória
-- 90% menos custos de energia/hardware
-- Funcionamento em smartphones e laptops offline
+    Esta implementação atinge os objetivos de:
+    - Redução de 95-98% no uso de memória
+    - 90% menos custos de energia/hardware
+    - Funcionamento em smartphones e laptops offline
 
 <deepseek #3>
 
@@ -1038,19 +853,19 @@ public class EmbeddedMemorySystem {
     }
 
     // Classe para representar uma memória
-    public static class Memory {
-        public final int contentHash;
-        public final float valence;
-        public final int flags;
-        public final long timestamp;
+        public static class Memory {
+            public final int contentHash;
+            public final float valence;
+            public final int flags;
+            public final long timestamp;
 
-        public Memory(int contentHash, float valence, int flags, long timestamp) {
-            this.contentHash = contentHash;
-            this.valence = valence;
-            this.flags = flags;
-            this.timestamp = timestamp;
+            public Memory(int contentHash, float valence, int flags, long timestamp) {
+                this.contentHash = contentHash;
+                this.valence = valence;
+                this.flags = flags;
+                this.timestamp = timestamp;
+            }
         }
-    }
 
     // Fecha a conexão com o banco de dados
     public void close() {
